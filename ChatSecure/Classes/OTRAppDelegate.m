@@ -76,6 +76,8 @@
 {
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
+#if HOCKEYAPP_ENABLED
+    
     [[BITHockeyManager sharedHockeyManager] configureWithBetaIdentifier:kOTRHockeyBetaIdentifier
                                                          liveIdentifier:kOTRHockeyLiveIdentifier
                                                                delegate:self];
@@ -83,6 +85,8 @@
     [[BITHockeyManager sharedHockeyManager] startManager];
 #ifndef DEBUG
     [[BITHockeyManager sharedHockeyManager].authenticator authenticateInstallation];
+#endif
+    
 #endif
     
     _theme = [[[self themeClass] alloc] init];

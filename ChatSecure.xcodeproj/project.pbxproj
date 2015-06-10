@@ -2342,6 +2342,16 @@
 				BUNDLE_DISPLAY_NAME_SUFFIX = " β";
 				BUNDLE_ID_SUFFIX = .beta;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"$(inherited)",
+					"BITHOCKEY_VERSION=\"@\\\"3.6.4\\\"\"",
+					"BITHOCKEY_C_VERSION=\"\\\"3.6.4\\\"\"",
+					"BITHOCKEY_BUILD=\"@\\\"38\\\"\"",
+					"BITHOCKEY_C_BUILD=\"\\\"38\\\"\"",
+					"HOCKEYAPP_ENABLED=1",
+				);
 				INFOPLIST_FILE = ChatSecure/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2452,6 +2462,16 @@
 				BUNDLE_DISPLAY_NAME_SUFFIX = " α";
 				BUNDLE_ID_SUFFIX = .debug;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"$(inherited)",
+					"BITHOCKEY_VERSION=\"@\\\"3.6.4\\\"\"",
+					"BITHOCKEY_C_VERSION=\"\\\"3.6.4\\\"\"",
+					"BITHOCKEY_BUILD=\"@\\\"38\\\"\"",
+					"BITHOCKEY_C_BUILD=\"\\\"38\\\"\"",
+					"HOCKEYAPP_ENABLED=1",
+				);
 				INFOPLIST_FILE = ChatSecure/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2468,6 +2488,16 @@
 				BUNDLE_DISPLAY_NAME_SUFFIX = "";
 				BUNDLE_ID_SUFFIX = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"$(inherited)",
+					"BITHOCKEY_VERSION=\"@\\\"3.6.4\\\"\"",
+					"BITHOCKEY_C_VERSION=\"\\\"3.6.4\\\"\"",
+					"BITHOCKEY_BUILD=\"@\\\"38\\\"\"",
+					"BITHOCKEY_C_BUILD=\"\\\"38\\\"\"",
+					"HOCKEYAPP_ENABLED=1",
+				);
 				INFOPLIST_FILE = ChatSecure/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

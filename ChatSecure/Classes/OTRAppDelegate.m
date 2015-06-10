@@ -55,6 +55,7 @@
 #import "OTRNotificationController.h"
 #import "UIAlertView+Blocks.h"
 #import "OTRWelcomeViewController.h"
+#import "OTRTheme.h"
 
 #if CHATSECURE_DEMO
 #import "OTRChatDemo.h"
@@ -83,6 +84,8 @@
 #ifndef DEBUG
     [[BITHockeyManager sharedHockeyManager].authenticator authenticateInstallation];
 #endif
+    
+    _theme = [[[self themeClass] alloc] init];
     
     [OTRCertificatePinning loadBundledCertificatesToKeychain];
     
@@ -129,6 +132,7 @@
         } else {
             __weak typeof(self)weakSelf = self;
             OTRWelcomeViewController *welcomeViewController = [[OTRWelcomeViewController alloc] initWithDefaultAccountArray];
+            [self.theme setThemeForWelcomeViewController:welcomeViewController];
             [welcomeViewController setSuccessBlock:^{
                 //Todo: make nice and aminated :)
                 __strong typeof(weakSelf)strongSelf = weakSelf;
@@ -160,6 +164,8 @@
     [self autoLogin];
     
     [self removeFacebookAccounts];
+    
+    [self.theme setupGlobalTheme];
     
     return YES;
 }
@@ -428,4 +434,11 @@
     return (OTRAppDelegate *)[[UIApplication sharedApplication] delegate];
 }
 
+#pragma mark - Theming
+
+- (Class) themeClass {
+    return [OTRTheme class];
+}
+
 @end
+

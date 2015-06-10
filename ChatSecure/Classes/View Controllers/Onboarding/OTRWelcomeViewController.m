@@ -57,6 +57,8 @@
 {
     if (self = [super init]) {
         self.tableViewHeight = 3*33;
+        _backgroundColor = [UIColor whiteColor];
+        _textLabelColor = [UIColor darkTextColor];
     }
     return self;
 }
@@ -75,7 +77,7 @@
     [super viewDidLoad];
     
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = self.backgroundColor;
     
     
     _brandImageView = [[UIImageView alloc] initForAutoLayout];
@@ -86,12 +88,14 @@
     self.anonymousLabel.numberOfLines = 0;
     self.anonymousLabel.textAlignment = NSTextAlignmentCenter;
     self.anonymousLabel.text = @"Anonymous";
+    self.anonymousLabel.textColor = self.textLabelColor;
     
     _createLabel = [[UILabel alloc] initForAutoLayout];
     self.createLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.createLabel.numberOfLines = 0;
     self.createLabel.textAlignment = NSTextAlignmentCenter;
     self.createLabel.text = @"Sign Up";
+    self.createLabel.textColor = self.textLabelColor;
     
     _createView = [[OTRCircleView alloc] initForAutoLayout];
     self.createView.backgroundColor = [UIColor lightGrayColor];

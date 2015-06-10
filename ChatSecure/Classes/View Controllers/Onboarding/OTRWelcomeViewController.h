@@ -22,6 +22,9 @@
 
 @interface OTRWelcomeViewController : UIViewController
 
+@property (nonatomic, strong) UIColor *backgroundColor;
+@property (nonatomic, strong) UIColor *textLabelColor;
+
 @property (nonatomic, strong, readonly) UIImageView *brandImageView;
 @property (nonatomic, strong, readonly) UILabel *createLabel;
 @property (nonatomic, strong, readonly) UILabel *anonymousLabel;

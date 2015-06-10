@@ -26,6 +26,8 @@
 @class OTRSettingsViewController;
 @class OTRMessagesHoldTalkViewController;
 @class OTRConversationViewController;
+@class OTRWelcomeViewController;
+@class OTRTheme;
 
 @interface OTRAppDelegate : UIResponder <UIApplicationDelegate, BITHockeyManagerDelegate>
 
@@ -38,8 +40,14 @@
 @property (nonatomic) UIBackgroundTaskIdentifier backgroundTask;
 @property (nonatomic) BOOL didShowDisconnectionWarning;
 
+
 - (void) showConversationViewController;
 
 + (instancetype) appDelegate;
+
+// Theming
+@property (nonatomic, strong, readonly) OTRTheme *theme;
+/** Override this in subclass to use a different theme class */
+- (Class) themeClass;
 
 @end

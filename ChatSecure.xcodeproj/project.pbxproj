@@ -393,6 +393,9 @@
 		D9F792031B28BD9900DBF943 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D9F792021B28BD9900DBF943 /* Images.xcassets */; };
 		D9F7920B1B28C6F400DBF943 /* ZomAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F7920A1B28C6F400DBF943 /* ZomAppDelegate.m */; };
 		D9F7920E1B28C74E00DBF943 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F7920D1B28C74E00DBF943 /* main.m */; };
+		D9F792111B28EC8800DBF943 /* OTRTheme.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F792101B28EC8800DBF943 /* OTRTheme.m */; };
+		D9F792121B28EC8800DBF943 /* OTRTheme.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F792101B28EC8800DBF943 /* OTRTheme.m */; };
+		D9F792151B28ED6500DBF943 /* ZomTheme.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F792141B28ED6500DBF943 /* ZomTheme.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -833,6 +836,10 @@
 		D9F792091B28C6F400DBF943 /* ZomAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZomAppDelegate.h; path = Whitelabel/Zom/Classes/ZomAppDelegate.h; sourceTree = SOURCE_ROOT; };
 		D9F7920A1B28C6F400DBF943 /* ZomAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZomAppDelegate.m; path = Whitelabel/Zom/Classes/ZomAppDelegate.m; sourceTree = SOURCE_ROOT; };
 		D9F7920D1B28C74E00DBF943 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Whitelabel/Zom/Classes/main.m; sourceTree = "<group>"; };
+		D9F7920F1B28EC8800DBF943 /* OTRTheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTRTheme.h; sourceTree = "<group>"; };
+		D9F792101B28EC8800DBF943 /* OTRTheme.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTRTheme.m; sourceTree = "<group>"; };
+		D9F792131B28ED6500DBF943 /* ZomTheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZomTheme.h; path = Whitelabel/Zom/Classes/ZomTheme.h; sourceTree = "<group>"; };
+		D9F792141B28ED6500DBF943 /* ZomTheme.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZomTheme.m; path = Whitelabel/Zom/Classes/ZomTheme.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1100,6 +1107,8 @@
 		633105E71A16D1A300C17BAE /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				D9F7920F1B28EC8800DBF943 /* OTRTheme.h */,
+				D9F792101B28EC8800DBF943 /* OTRTheme.m */,
 				633105E81A16D1A300C17BAE /* OTRCertificatePinning.h */,
 				633105E91A16D1A300C17BAE /* OTRCertificatePinning.m */,
 				633105EA1A16D1A300C17BAE /* OTRChatDemo.h */,
@@ -1531,6 +1540,8 @@
 			isa = PBXGroup;
 			children = (
 				D9F7920D1B28C74E00DBF943 /* main.m */,
+				D9F792131B28ED6500DBF943 /* ZomTheme.h */,
+				D9F792141B28ED6500DBF943 /* ZomTheme.m */,
 				D9F792091B28C6F400DBF943 /* ZomAppDelegate.h */,
 				D9F7920A1B28C6F400DBF943 /* ZomAppDelegate.m */,
 			);
@@ -1879,6 +1890,7 @@
 				633106811A16D1A300C17BAE /* OTREncryptionManager.m in Sources */,
 				633106E21A16D1A300C17BAE /* OTRCertificatePinning.m in Sources */,
 				633107161A16D1A300C17BAE /* OTRInLineTextEditTableViewCell.m in Sources */,
+				D9F792111B28EC8800DBF943 /* OTRTheme.m in Sources */,
 				633107121A16D1A300C17BAE /* OTRAccountTableViewCell.m in Sources */,
 				633106E71A16D1A300C17BAE /* OTRNotificationPermissions.m in Sources */,
 				633107071A16D1A300C17BAE /* OTRMessagesViewController.m in Sources */,
@@ -2141,6 +2153,7 @@
 				D9F791911B28BBB000DBF943 /* OTRDoubleSetting.m in Sources */,
 				D9F791921B28BBB000DBF943 /* OTRManagedBuddy.m in Sources */,
 				D9F791931B28BBB000DBF943 /* OTRManagedGroup.m in Sources */,
+				D9F792151B28ED6500DBF943 /* ZomTheme.m in Sources */,
 				D9F791941B28BBB000DBF943 /* OTRChatSecureIDCreateAccountHandler.m in Sources */,
 				D9F791951B28BBB000DBF943 /* OTRManagedOscarAccount.m in Sources */,
 				D9F791961B28BBB000DBF943 /* NSURL+ChatSecure.m in Sources */,
@@ -2168,6 +2181,7 @@
 				D9F791AD1B28BBB000DBF943 /* OTRQRCodeActivity.m in Sources */,
 				D9F791AE1B28BBB000DBF943 /* OTRAppDelegate.m in Sources */,
 				D9F791AF1B28BBB000DBF943 /* OTRCertificatesViewController.m in Sources */,
+				D9F792121B28EC8800DBF943 /* OTRTheme.m in Sources */,
 				D9F791B01B28BBB000DBF943 /* OTRTorManager.m in Sources */,
 				D9F791B11B28BBB000DBF943 /* OTRLanguageSetting.m in Sources */,
 				D9F791B21B28BBB000DBF943 /* OTRXMPPAccount.m in Sources */,

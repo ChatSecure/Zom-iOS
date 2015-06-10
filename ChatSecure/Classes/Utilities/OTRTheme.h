@@ -20,7 +20,7 @@
 /** Set global app appearance via UIAppearance */
 - (void) setupGlobalTheme;
 
-/** Can override backgroundColor and textLabelColor */
+/** Can override backgroundColor, textLabelColor, lightBackgroundColor */
 - (void) setThemeForWelcomeViewController:(OTRWelcomeViewController*)welcomeViewController;
 
 @end

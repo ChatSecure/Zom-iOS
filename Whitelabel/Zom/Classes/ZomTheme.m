@@ -35,6 +35,7 @@
 - (void) setThemeForWelcomeViewController:(OTRWelcomeViewController*)welcomeViewController {
     welcomeViewController.textLabelColor = [UIColor whiteColor];
     welcomeViewController.backgroundColor = self.mainThemeColor;
+    welcomeViewController.lightBackgroundColor = self.lightThemeColor;
 }
 
 @end

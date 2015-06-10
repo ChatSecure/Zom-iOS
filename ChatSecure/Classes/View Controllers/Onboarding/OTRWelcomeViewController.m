@@ -94,11 +94,11 @@
     self.createLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.createLabel.numberOfLines = 0;
     self.createLabel.textAlignment = NSTextAlignmentCenter;
-    self.createLabel.text = @"Sign Up";
+    self.createLabel.text = NSLocalizedString(@"Sign Up", @"Sign up with new account");
     self.createLabel.textColor = self.textLabelColor;
     
     _createView = [[OTRCircleView alloc] initForAutoLayout];
-    self.createView.backgroundColor = [UIColor lightGrayColor];
+    self.createView.backgroundColor = self.lightBackgroundColor;
     UITapGestureRecognizer *createTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapCreateChatID:)];
     [self.createView addGestureRecognizer:createTapGestureRecognizer];
     
@@ -109,7 +109,7 @@
     [createImageView autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero];
     
     _anonymousView = [[OTRCircleView alloc] initForAutoLayout];
-    self.anonymousView.backgroundColor = [UIColor lightGrayColor];
+    self.anonymousView.backgroundColor = self.lightBackgroundColor;
     UITapGestureRecognizer *anonymousTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self  action:@selector(didTapCreateAnonymousAccount:)];
     [self.anonymousView addGestureRecognizer:anonymousTapGestureRecognizer];
     
@@ -119,22 +119,20 @@
     [self.anonymousView addSubview:anonymousImageView];
     [anonymousImageView autoPinEdgesToSuperviewEdgesWithInsets:UIEdgeInsetsZero];
     
-    _accountPickerHeaderView = [[UIView alloc] initForAutoLayout];
-    self.accountPickerHeaderView.backgroundColor = [UIColor darkGrayColor];
-    
     self.accountTableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     self.accountTableView.translatesAutoresizingMaskIntoConstraints = NO;
     self.accountTableView.delegate = self.tableViewDelegate;
     self.accountTableView.dataSource = self.tableViewDelegate;
     
     _accountPickerHeaderView = [[UIView alloc] initForAutoLayout];
-    self.accountPickerHeaderView.backgroundColor = [UIColor lightGrayColor];
+    self.accountPickerHeaderView.backgroundColor = self.backgroundColor;
     
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapHeaderView:)];
     [self.accountPickerHeaderView addGestureRecognizer:tapGestureRecognizer];
     
     _accountPickkerHeaderLabel = [[UILabel alloc] initForAutoLayout];
-    _accountPickkerHeaderLabel.text = @"Login";
+    _accountPickkerHeaderLabel.text = NSLocalizedString(@"Login", @"Login with existing account");
+    self.accountPickkerHeaderLabel.textColor = self.textLabelColor;
     
     _accountPickerHeaderImageView = [[UIImageView alloc] initForAutoLayout];
     

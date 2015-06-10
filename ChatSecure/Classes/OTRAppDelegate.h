@@ -40,7 +40,6 @@
 
 - (void) showConversationViewController;
 
-+ (OTRAppDelegate *)appDelegate;
-
++ (instancetype) appDelegate;
 
 @end

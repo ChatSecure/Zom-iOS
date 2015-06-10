@@ -404,7 +404,7 @@
 }
 
 #pragma - mark Class Methods
-+ (OTRAppDelegate *)appDelegate
++ (instancetype)appDelegate
 {
     return (OTRAppDelegate *)[[UIApplication sharedApplication] delegate];
 }

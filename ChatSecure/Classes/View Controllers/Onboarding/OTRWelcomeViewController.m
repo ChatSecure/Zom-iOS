@@ -234,8 +234,8 @@
 
 - (void)didTapCreateAnonymousAccount:(id)sender
 {
-    NSLog(@"Moose");
-    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Coming soon!" message:nil delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];
 }
 
 - (NSArray *)defaultAccountArray

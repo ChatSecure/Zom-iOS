@@ -11,6 +11,7 @@
 
 @interface OTRXMPPCreateAccountHandler : OTRXMPPLoginHandler
 
+@property (nonatomic) BOOL disableCertPinning;
 @property (nonatomic, strong) NSString *password;
 
 @end

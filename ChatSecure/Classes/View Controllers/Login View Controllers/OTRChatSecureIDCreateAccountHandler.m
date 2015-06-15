@@ -63,6 +63,8 @@
 - (void)performActionWithValidForm:(XLFormDescriptor *)form account:(OTRAccount *)account completion:(void (^)(NSError *, OTRAccount *))completion
 {
     self.password = [OTRPasswordGenerator passwordWithLength:25];//Create random password
+#warning disable cert pinning
+    self.disableCertPinning = YES;
     [super performActionWithValidForm:form account:account completion:completion];
 }
 - (void)receivedNotification:(NSNotification *)notification

@@ -395,6 +395,15 @@ NSString *const OTRXMPPLoginErrorKey = @"OTRXMPPLoginErrorKey";
 #pragma mark Connect/disconnect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void) setDisableCertPinning:(BOOL)disableCertPinning {
+    _disableCertPinning = disableCertPinning;
+    if (_disableCertPinning) {
+        [self.certificatePinningModule deactivate];
+    } else {
+        [self.certificatePinningModule activate:self.xmppStream];
+    }
+}
+
 - (BOOL)connectWithJID:(NSString*) myJID password:(NSString*)myPassword;
 {
     self.password = myPassword;
@@ -1045,7 +1054,7 @@ managedBuddyObjectID
 - (void)newTrust:(SecTrustRef)trust withHostName:(NSString *)hostname systemTrustResult:(SecTrustResultType)trustResultType
 {
     NSData * certifcateData = [OTRCertificatePinning dataForCertificate:[OTRCertificatePinning certForTrust:trust]];
-    DDLogVerbose(@"New trustResultType: %d certLength: %d", (int)trustResultType, (int)certifcateData.length);
+    DDLogVerbose(@"New trustResultType for %@: %d certLength: %d", hostname, (int)trustResultType, (int)certifcateData.length);
     NSError *error = [OTRXMPPError errorForTrustResult:trustResultType withCertData:certifcateData hostname:hostname];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self failedToConnect:error];

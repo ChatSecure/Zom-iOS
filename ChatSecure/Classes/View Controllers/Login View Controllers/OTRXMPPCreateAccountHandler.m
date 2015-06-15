@@ -56,7 +56,7 @@
         _password = passowrdFromForm;
     }
     
-
+    self.xmppManager.disableCertPinning = self.disableCertPinning;
     [self.xmppManager registerNewAccountWithPassword:self.password];
     
 }

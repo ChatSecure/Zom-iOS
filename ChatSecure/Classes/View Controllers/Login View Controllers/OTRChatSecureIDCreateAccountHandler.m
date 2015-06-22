@@ -48,6 +48,8 @@
     }
     account.username = [XMPPJID jidWithUser:user domain:userDomain resource:nil].bare;
     account.domain = serverInfo.serverDomain;
+    account.rememberPassword = YES;
+    account.autologin = YES;
 }
 
 - (void)attemptToCreateAccount
@@ -81,6 +83,10 @@
         
         [self attemptToCreateAccount];
     } else {
+        if (newStatus == OTRLoginStatusAuthenticated) {
+            OTRAccount *account = self.xmppManager.account;
+            self.account.password = self.password;
+        }
         [super receivedNotification:notification];
     }
 }

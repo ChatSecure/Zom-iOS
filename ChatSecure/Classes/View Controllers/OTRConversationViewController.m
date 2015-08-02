@@ -26,8 +26,12 @@
 #import "YapDatabaseConnection.h"
 #import "OTRDatabaseView.h"
 #import "YapDatabaseViewMappings.h"
+#import "Strings.h"
 #import <KVOController/FBKVOController.h>
 #import "OTRAppDelegate.h"
+#import "OTRProtocolManager.h"
+#import "OTRWelcomeViewController.h"
+#import "OTRInviteViewController.h"
 
 
 static CGFloat kOTRConversationCellHeight = 80.0;
@@ -42,6 +46,8 @@ static CGFloat kOTRConversationCellHeight = 80.0;
 @property (nonatomic, strong) YapDatabaseViewMappings *unreadMessagesMappings;
 
 @property (nonatomic, strong) UIBarButtonItem *composeBarButtonItem;
+
+@property (nonatomic) BOOL hasPresentedOnboarding;
 @end
 
 @implementation OTRConversationViewController
@@ -115,15 +121,44 @@ static CGFloat kOTRConversationCellHeight = 80.0;
     ////// KVO //////
     __weak typeof(self)weakSelf = self;
     [self.KVOController observe:[OTRProtocolManager sharedInstance] keyPath:NSStringFromSelector(@selector(numberOfConnectedProtocols)) options:NSKeyValueObservingOptionNew block:^(id observer, id object, NSDictionary *change) {
-        __strong typeof(weakSelf)strongSelf = weakSelf;
-        NSUInteger numberConnectedAccounts = [[change objectForKey:NSKeyValueChangeNewKey] unsignedIntegerValue];
-        if (numberConnectedAccounts) {
-            [strongSelf enableComposeButton];
-        }
-        else {
-            [strongSelf disableComposeButton];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf)strongSelf = weakSelf;
+            NSUInteger numberConnectedAccounts = [[change objectForKey:NSKeyValueChangeNewKey] unsignedIntegerValue];
+            if (numberConnectedAccounts) {
+                [strongSelf enableComposeButton];
+            }
+            else {
+                [strongSelf disableComposeButton];
+            }
+        });
+    }];
+}
+
+- (void) showOnboardingIfNeeded {
+    if (self.hasPresentedOnboarding) {
+        return;
+    }
+    __block BOOL hasAccounts = NO;
+    [[OTRDatabaseManager sharedInstance].readOnlyDatabaseConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
+        NSUInteger count = [transaction numberOfKeysInCollection:[OTRAccount collection]];
+        if (count > 0) {
+            hasAccounts = YES;
         }
     }];
+    //If there is any number of accounts launch into default conversation view otherwise onboarding time
+    if (!hasAccounts) {
+        OTRWelcomeViewController *welcomeViewController = [[OTRWelcomeViewController alloc] init];
+        __weak OTRWelcomeViewController *weakVC = welcomeViewController;
+        [welcomeViewController setCompletionBlock:^(OTRAccount *account, NSError *error) {
+            if (account) {
+                [OTRInviteViewController showInviteFromVC:weakVC withAccount:account];
+            }
+        }];
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:welcomeViewController];
+        nav.modalPresentationStyle = UIModalPresentationFullScreen;
+        [self presentViewController:nav animated:NO completion:nil];
+        self.hasPresentedOnboarding = YES;
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -150,6 +185,7 @@ static CGFloat kOTRConversationCellHeight = 80.0;
 {
     [super viewDidAppear:animated];
     [OTRNotificationPermissions checkPermissions];
+    [self showOnboardingIfNeeded];
 }
 
 - (void)viewWillDisappear:(BOOL)animated

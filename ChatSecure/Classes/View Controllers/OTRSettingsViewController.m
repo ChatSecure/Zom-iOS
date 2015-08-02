@@ -29,11 +29,9 @@
 #import "OTRAboutViewController.h"
 #import "OTRQRCodeViewController.h"
 #import <QuartzCore/QuartzCore.h>
-#import "OTRNewAccountViewController.h"
 #import "OTRConstants.h"
 #import "UserVoice.h"
 #import "OTRAccountTableViewCell.h"
-#import "OTRCreateAccountChooserViewController.h"
 #import "UIAlertView+Blocks.h"
 #import "UIActionSheet+ChatSecure.h"
 #import "UIActionSheet+Blocks.h"
@@ -50,7 +48,12 @@
 #import "OTRShareSetting.h"
 #import "OTRActivityItemProvider.h"
 #import "OTRQRCodeActivity.h"
+#import "XMPPURI.h"
+#import "OTRWelcomeViewController.h"
+#import "OTRBaseLoginViewController.h"
+#import "OTRXLFormCreator.h"
 #import <KVOController/FBKVOController.h>
+#import "OTRInviteViewController.h"
 
 static NSString *const circleImageName = @"31-circle-plus-large.png";
 
@@ -60,7 +63,6 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
 @property (nonatomic, strong) YapDatabaseConnection *databaseConnection;
 @property (nonatomic, strong) UITableView *tableView;
 
-- (void) addAccount:(id)sender;
 @end
 
 @implementation OTRSettingsViewController
@@ -249,7 +251,11 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
             
             BOOL connected = [[OTRProtocolManager sharedInstance] isAccountConnected:account];
             if (!connected) {
-                [OTRLoginViewController showLoginViewControllerWithAccount:account fromViewController:self completion:nil];
+                OTRBaseLoginViewController *baseLoginViewController = [OTRBaseLoginViewController loginViewControllerForAccount:account];
+                baseLoginViewController.showsCancelButton = YES;
+                UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:baseLoginViewController];
+                navigationController.modalPresentationStyle = UIModalPresentationFormSheet;
+                [self presentViewController:navigationController animated:YES completion:nil];
             } else {
                 [self logoutAccount:account sender:[tableView cellForRowAtIndexPath:indexPath]];
             }
@@ -312,13 +318,18 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
 {
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
         
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:LOGOUT_STRING message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
         UIAlertAction *cancelAlertAction = [UIAlertAction actionWithTitle:CANCEL_STRING style:UIAlertActionStyleCancel handler:nil];
         UIAlertAction *logoutAlertAction = [UIAlertAction actionWithTitle:LOGOUT_STRING style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
             id<OTRProtocol> protocol = [[OTRProtocolManager sharedInstance] protocolForAccount:account];
             [protocol disconnect];
         }];
         
+        UIAlertAction *shareAction = [UIAlertAction actionWithTitle:SHARE_STRING style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [self shareAccount:account sender:sender];
+        }];
+        
+        [alertController addAction:shareAction];
         [alertController addAction:logoutAlertAction];
         [alertController addAction:cancelAlertAction];
         
@@ -336,62 +347,27 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
             id<OTRProtocol> protocol = [[OTRProtocolManager sharedInstance] protocolForAccount:account];
             [protocol disconnect];
         }];
+        RIButtonItem *shareButtonItem = [RIButtonItem itemWithLabel:SHARE_STRING action:^{
+            [self shareAccount:account sender:sender];
+        }];
         
-        UIActionSheet * logoutActionSheet = [[UIActionSheet alloc] initWithTitle:LOGOUT_STRING cancelButtonItem:cancelButtonItem destructiveButtonItem:logoutButtonItem otherButtonItems:nil];
+        UIActionSheet * logoutActionSheet = [[UIActionSheet alloc] initWithTitle:nil cancelButtonItem:cancelButtonItem destructiveButtonItem:logoutButtonItem otherButtonItems:shareButtonItem, nil];
         
         [logoutActionSheet otr_presentInView:self.view];
     }
 }
 
 - (void) addAccount:(id)sender {
-    
-    void (^createAccountBlock)(void) = ^void(void) {
-        OTRCreateAccountChooserViewController * createAccountChooser = [[OTRCreateAccountChooserViewController alloc] init];
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:createAccountChooser];
-        nav.modalPresentationStyle = UIModalPresentationFormSheet;
-        [self presentViewController:nav animated:YES completion:nil];
-    };
-    
-    void (^connectAccountBlock)(void) = ^void(void) {
-        OTRNewAccountViewController * newAccountView = [[OTRNewAccountViewController alloc] init];
-        
-        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:newAccountView];
-        nav.modalPresentationStyle = UIModalPresentationFormSheet;
-        [self presentViewController:nav animated:YES completion:nil];
-    };
-    
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:NEW_ACCOUNT_STRING message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:CANCEL_STRING style:UIAlertActionStyleCancel handler:nil];
-        
-        UIAlertAction *createAccountAction = [UIAlertAction actionWithTitle:CREATE_NEW_ACCOUNT_STRING style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            createAccountBlock();
-        }];
-        
-        UIAlertAction *loginAccountAction = [UIAlertAction actionWithTitle:CONNECT_EXISTING_STRING style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            connectAccountBlock();
-        }];
-        
-        [alertController addAction:createAccountAction];
-        [alertController addAction:loginAccountAction];
-        [alertController addAction:cancelAction];
-        
-        if ([sender isKindOfClass:[UIView class]]) {
-            UIView *senderView = (UIView *)sender;
-            alertController.popoverPresentationController.sourceRect = senderView.bounds;
-            alertController.popoverPresentationController.sourceView = senderView;
+    OTRWelcomeViewController *welcomeViewController = [[OTRWelcomeViewController alloc] init];
+    __weak id welcomeVC = welcomeViewController;
+    welcomeViewController.showNavigationBar = NO;
+    [welcomeViewController setCompletionBlock:^(OTRAccount *account, NSError *error) {
+        if (account) {
+            [OTRInviteViewController showInviteFromVC:welcomeVC withAccount:account];
         }
-        
-        [self presentViewController:alertController animated:YES completion:nil];
-    }
-    else {
-        RIButtonItem *cancelButton = [RIButtonItem itemWithLabel:CANCEL_STRING];
-        RIButtonItem *createAccountButton = [RIButtonItem itemWithLabel:CREATE_NEW_ACCOUNT_STRING action:createAccountBlock];
-        RIButtonItem *loginAccountButton = [RIButtonItem itemWithLabel:CONNECT_EXISTING_STRING action:connectAccountBlock];
-        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:NEW_ACCOUNT_STRING cancelButtonItem:cancelButton destructiveButtonItem:nil otherButtonItems:createAccountButton,loginAccountButton, nil];
-        
-        [actionSheet showInView:self.view];
-    }
+    }];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:welcomeViewController];
+    [self presentViewController:nav animated:YES completion:nil];
 }
 
 - (NSIndexPath *)indexPathForSetting:(OTRSetting *)setting
@@ -476,6 +452,26 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
     activityViewController.excludedActivityTypes = @[UIActivityTypePrint, UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll];
     
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[self indexPathForSetting:shareSetting]];
+    
+    if( SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+        activityViewController.popoverPresentationController.sourceView = cell;
+        activityViewController.popoverPresentationController.sourceRect = cell.bounds;
+    }
+    
+    [self presentViewController:activityViewController animated:YES completion:nil];
+}
+
+- (void) shareAccount:(OTRAccount*)account sender:(id)sender {
+    XMPPJID *jid = [XMPPJID jidWithString:account.username];
+    XMPPURI *uri = [[XMPPURI alloc] initWithJID:jid queryAction:@"subscribe" queryParameters:nil];
+    NSURL *url = [NSURL URLWithString:uri.uriString];
+    
+    OTRQRCodeActivity * qrCodeActivity = [[OTRQRCodeActivity alloc] init];
+    
+    UIActivityViewController * activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[url] applicationActivities:@[qrCodeActivity]];
+    activityViewController.excludedActivityTypes = @[UIActivityTypePrint, UIActivityTypeSaveToCameraRoll, UIActivityTypeAddToReadingList];
+    
+    UITableViewCell *cell = sender;
     
     if( SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
         activityViewController.popoverPresentationController.sourceView = cell;

@@ -24,7 +24,7 @@
 - (instancetype)init
 {
     if (self = [super init]) {
-        self.serverList = [[OTRXMPPServerInfo defaultServerListIncludeTor:NO] mutableCopy];
+        self.serverList = [[OTRXMPPServerInfo defaultServerList] mutableCopy];
     }
     return self;
 }
@@ -33,6 +33,8 @@
 {
     [super prepareForXMPPConnectionFrom:form account:account];
     [self moveServerInfo:[self.serverList firstObject] intoAccount:account];
+    account.rememberPassword = YES;
+    account.autologin = YES;
     self.account = account;
 }
 
@@ -42,14 +44,8 @@
     if (![user length]) {
         user = account.username;
     }
-    NSString *userDomain = serverInfo.userDomain;
-    if (![userDomain length]) {
-        userDomain = serverInfo.serverDomain;
-    }
-    account.username = [XMPPJID jidWithUser:user domain:userDomain resource:nil].bare;
-    account.domain = serverInfo.serverDomain;
-    account.rememberPassword = YES;
-    account.autologin = YES;
+    account.username = [XMPPJID jidWithUser:user domain:serverInfo.domain resource:nil].bare;
+    account.domain = serverInfo.domain;
 }
 
 - (void)attemptToCreateAccount
@@ -62,7 +58,7 @@
     }
 }
 
-- (void)performActionWithValidForm:(XLFormDescriptor *)form account:(OTRAccount *)account completion:(void (^)(NSError *, OTRAccount *))completion
+- (void)performActionWithValidForm:(XLFormDescriptor *)form account:(OTRAccount *)account completion:(void (^)(OTRAccount * account, NSError *error))completion
 {
     self.password = [OTRPasswordGenerator passwordWithLength:25];//Create random password
 #warning disable cert pinning
@@ -83,8 +79,9 @@
         
         [self attemptToCreateAccount];
     } else {
+        //successfully created account
+        //need to save password
         if (newStatus == OTRLoginStatusAuthenticated) {
-            OTRAccount *account = self.xmppManager.account;
             self.account.password = self.password;
         }
         [super receivedNotification:notification];

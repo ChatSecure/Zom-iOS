@@ -12,6 +12,11 @@
 #import "OTRXLFormCreator.h"
 #import "OTRProtocolManager.h"
 #import "OTRDatabaseManager.h"
+#import "OTRPasswordGenerator.h"
+
+@interface OTRXMPPLoginHandler()
+@property (nonatomic, strong) NSString *password;
+@end
 
 @implementation OTRXMPPLoginHandler
 
@@ -34,10 +39,32 @@
 
 - (OTRXMPPAccount *)moveValues:(XLFormDescriptor *)form intoAccount:(OTRXMPPAccount *)account
 {
-    account.username = [[form formRowWithTag:kOTRXLFormUsernameTextFieldTag] value];
-    account.rememberPassword = [[[form formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] value] boolValue];
-    account.autologin = [[[form formRowWithTag:kOTRXLFormLoginAutomaticallySwitchTag] value] boolValue];
-    account.password = [[form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+    NSString *username = [[form formRowWithTag:kOTRXLFormUsernameTextFieldTag] value];
+    account.username = username;
+    NSNumber *rememberPassword = [[form formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] value];
+    if (rememberPassword) {
+        account.rememberPassword = [rememberPassword boolValue];
+    } else {
+        account.rememberPassword = YES;
+    }
+    NSString *password = [[form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+    if (password && password.length > 0) {
+        self.password = password;
+    } else {
+        // No password in field, generate strong password for user
+        self.password = [OTRPasswordGenerator passwordWithLength:20];
+    }
+    
+    NSNumber *autologin = [[form formRowWithTag:kOTRXLFormLoginAutomaticallySwitchTag] value];
+    if (autologin) {
+        account.autologin = [autologin boolValue];
+    } else {
+        account.autologin = YES;
+    }
+    // Don't login automatically for Tor accounts
+    if (account.accountType == OTRAccountTypeXMPPTor) {
+        account.autologin = NO;
+    }
     
     NSString *hostname = [[form formRowWithTag:kOTRXLFormHostnameTextFieldTag] value];
     NSNumber *port = [[form formRowWithTag:kOTRXLFormPortTextFieldTag] value];
@@ -71,7 +98,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:OTRXMPPLoginStatusNotificationName object:self.xmppManager];
 }
 
-- (void)performActionWithValidForm:(XLFormDescriptor *)form account:(OTRXMPPAccount *)account completion:(void (^)(NSError *, OTRAccount *))completion
+- (void)performActionWithValidForm:(XLFormDescriptor *)form account:(OTRXMPPAccount *)account completion:(void (^)(OTRAccount * account, NSError *error))completion
 {
     self.completion = completion;
     [self prepareForXMPPConnectionFrom:form account:account];
@@ -84,14 +111,23 @@
 {
     OTRLoginStatus newStatus = [notification.userInfo[OTRXMPPNewLoginStatusKey] integerValue];
     NSError *error = notification.userInfo[OTRXMPPLoginErrorKey];
-    
+    OTRAccount *account = self.xmppManager.account;
+
     if (newStatus == OTRLoginStatusAuthenticated) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        self.completion(nil,self.xmppManager.account);
+        
+        // Account has been created, so save the password
+        account.password = self.password;
+        
+        if (self.completion) {
+            self.completion(account,nil);
+        }
     }
     else if (error) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        self.completion(error,self.xmppManager.account);
+        if (self.completion) {
+            self.completion(account,error);
+        }
     }
 }
 

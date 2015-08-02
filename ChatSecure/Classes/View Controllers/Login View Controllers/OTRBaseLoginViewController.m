@@ -17,6 +17,7 @@
 #import "OTRDatabaseManager.h"
 #import "OTRAccount.h"
 #import "MBProgressHUD.h"
+#import "OTRXLFormCreator.h"
 
 @interface OTRBaseLoginViewController ()
 
@@ -38,6 +39,10 @@
 {
     [super viewWillAppear:animated];
     
+    if (self.showsCancelButton) {
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelButtonPressed:)];
+    }
+    
     [self.navigationController setNavigationBarHidden:NO animated:animated];
     [self.tableView reloadData];
     [self.createLoginHandler moveAccountValues:self.account intoForm:self.form];
@@ -49,15 +54,23 @@
     [self.createLoginHandler moveAccountValues:self.account intoForm:self.form];
 }
 
+- (void) cancelButtonPressed:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)loginButtonPressed:(id)sender
 {
     if ([self validForm]) {
+        self.form.disabled = YES;
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.loginCreateButtonItem.enabled = NO;
+        self.navigationItem.leftBarButtonItem.enabled = NO;
         self.navigationItem.backBarButtonItem.enabled = NO;
-        [self.createLoginHandler performActionWithValidForm:self.form account:self.account completion:^(NSError *error, OTRAccount *account) {
+        [self.createLoginHandler performActionWithValidForm:self.form account:self.account completion:^(OTRAccount *account, NSError *error) {
+            self.form.disabled = NO;
             self.loginCreateButtonItem.enabled = YES;
             self.navigationItem.backBarButtonItem.enabled = YES;
+            self.navigationItem.leftBarButtonItem.enabled = YES;
             [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
             if (error) {
                 [self handleError:error];
@@ -66,8 +79,10 @@
                 [[OTRDatabaseManager sharedInstance].readWriteDatabaseConnection readWriteWithBlock:^(YapDatabaseReadWriteTransaction *transaction) {
                     [self.account saveWithTransaction:transaction];
                 }];
-                if (self.successBlock) {
-                    self.successBlock();
+                if (self.completionBlock) {
+                    self.completionBlock(account, nil);
+                } else {
+                    [self dismissViewControllerAnimated:YES completion:nil];
                 }
             }
         }];
@@ -240,6 +255,17 @@
     
     [self.certAlertView setDefaultButtonImage:buttonImage forState:UIControlStateNormal];
     [self.certAlertView setDefaultButtonImage:buttonImage forState:UIControlStateHighlighted];
+}
+
+#pragma - mark Class Methods
+
++ (instancetype)loginViewControllerForAccount:(OTRAccount *)account
+{
+    OTRBaseLoginViewController *baseLoginViewController = [[self alloc] initWithForm:[OTRXLFormCreator formForAccount:account] style:UITableViewStyleGrouped];
+    baseLoginViewController.account = account;
+    baseLoginViewController.createLoginHandler = [OTRLoginHandler loginHandlerForAccount:account];
+    
+    return baseLoginViewController;
 }
 
 @end

@@ -10,7 +10,7 @@
 #import "XLForm.h"
 #import "OTRXMPPAccount.h"
 #import "Strings.h"
-#import "OTRXMPPServerTableViewCell.h"
+#import "XMPPServerInfoCell.h"
 #import "OTRImages.h"
 #import "OTRXMPPServerListViewController.h"
 #import "OTRXMPPServerInfo.h"
@@ -47,17 +47,16 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
 
 + (XLFormDescriptor *)formForAccountType:(OTRAccountType)accountType createAccount:(BOOL)createAccount;
 {
-    XLFormDescriptor *descriptor = [[XLFormDescriptor alloc] init];
-    
+    XLFormDescriptor *descriptor = nil;
     if (createAccount) {
-        
+        descriptor = [[XLFormDescriptor alloc] initWithTitle:NSLocalizedString(@"Sign Up", @"title for creating a new account")];
         XLFormSectionDescriptor *basicSection = [XLFormSectionDescriptor formSectionWithTitle:nil];
         [basicSection addFormRow:[self usernameTextFieldRowDescriptorWithValue:nil]];
         [basicSection addFormRow:[self passwordTextFieldRowDescriptorWithValue:nil]];
         
         
-        XLFormSectionDescriptor *serverSection = [XLFormSectionDescriptor formSectionWithTitle:@"Server"];
-        serverSection.footerTitle = @"Pick a server";
+        XLFormSectionDescriptor *serverSection = [XLFormSectionDescriptor formSectionWithTitle:NSLocalizedString(@"Server", @"server selection section title")];
+        serverSection.footerTitle = NSLocalizedString(@"Choose from our list of trusted servers, or bring your own.", @"server selection footer");
         [serverSection addFormRow:[self serverRowDescriptorWithValue:nil]];
         
         
@@ -66,6 +65,7 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
         
         
     } else {
+        descriptor = [[XLFormDescriptor alloc] initWithTitle:NSLocalizedString(@"Log In", @"title for logging in")];
         XLFormSectionDescriptor *basicSection = [XLFormSectionDescriptor formSectionWithTitle:BASIC_STRING];
         XLFormSectionDescriptor *advancedSection = [XLFormSectionDescriptor formSectionWithTitle:ADVANCED_STRING];
         
@@ -110,7 +110,7 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
     XLFormDescriptor *form = [XLFormDescriptor formDescriptor];
     XLFormSectionDescriptor *section = [XLFormSectionDescriptor formSection];
     XLFormRowDescriptor *usernameRow = [self usernameTextFieldRowDescriptorWithValue:nil];
-    [usernameRow.cellConfigAtConfigure setObject:USERNAME_STRING forKey:@"textField.placeholder"];
+    [usernameRow.cellConfigAtConfigure setObject:@"ChatSecure ID" forKey:@"textField.placeholder"];
     
     [section addFormRow:usernameRow];
     [form addFormSection:section];
@@ -191,7 +191,7 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
 {
     XLFormRowDescriptor *xmppServerDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:kOTRXLFormXMPPServerTag rowType:kOTRFormRowDescriptorTypeXMPPServer];
     
-    xmppServerDescriptor.value = [[OTRXMPPServerInfo defaultServerListIncludeTor:NO] firstObject];
+    xmppServerDescriptor.value = [[OTRXMPPServerInfo defaultServerList] firstObject];
     xmppServerDescriptor.action.viewControllerClass = [OTRXMPPServerListViewController class];
     
     return xmppServerDescriptor;

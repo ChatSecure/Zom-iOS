@@ -42,6 +42,7 @@
 #import "OTRLog.h"
 #import "DDTTYLogger.h"
 #import "OTRAccount.h"
+#import "OTRXMPPAccount.h"
 #import "OTRBuddy.h"
 #import "YAPDatabaseTransaction.h"
 #import "YapDatabaseConnection.h"
@@ -54,7 +55,10 @@
 #import "UIViewController+ChatSecure.h"
 #import "OTRNotificationController.h"
 #import "UIAlertView+Blocks.h"
+#import "XMPPURI.h"
 #import "OTRWelcomeViewController.h"
+#import "OTRProtocolManager.h"
+#import "OTRInviteViewController.h"
 #import "OTRTheme.h"
 
 #if CHATSECURE_DEMO
@@ -81,11 +85,7 @@
     [[BITHockeyManager sharedHockeyManager] configureWithBetaIdentifier:kOTRHockeyBetaIdentifier
                                                          liveIdentifier:kOTRHockeyLiveIdentifier
                                                                delegate:self];
-    [[BITHockeyManager sharedHockeyManager].authenticator setIdentificationType:BITAuthenticatorIdentificationTypeDevice];
     [[BITHockeyManager sharedHockeyManager] startManager];
-#ifndef DEBUG
-    [[BITHockeyManager sharedHockeyManager].authenticator authenticateInstallation];
-#endif
     
 #endif
     
@@ -117,43 +117,28 @@
             if (error) {
                 DDLogError(@"Password Error: %@",error);
             }
-            
         }
 
         [[OTRDatabaseManager sharedInstance] setupDatabaseWithName:OTRYapDatabaseName];
-        
-        __block BOOL hasAccounts = NO;
-        [[OTRDatabaseManager sharedInstance].readOnlyDatabaseConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
-            [transaction enumerateKeysInCollection:[OTRAccount collection] usingBlock:^(NSString *key, BOOL *stop) {
-                hasAccounts = YES;
-                *stop = YES;
-            }];
-        }];
-        
-        //If there is any number of accounts launch into default conversation view otherwise onboarding time
-        if (hasAccounts) {
-            rootViewController= [self defaultConversationNavigationController];
-        } else {
-            __weak typeof(self)weakSelf = self;
-            OTRWelcomeViewController *welcomeViewController = [[OTRWelcomeViewController alloc] initWithDefaultAccountArray];
-            [self.theme setThemeForWelcomeViewController:welcomeViewController];
-            [welcomeViewController setSuccessBlock:^{
-                //Todo: make nice and aminated :)
-                __strong typeof(weakSelf)strongSelf = weakSelf;
-                strongSelf.window.rootViewController = [strongSelf defaultConversationNavigationController];
-            }];
-            rootViewController = [[UINavigationController alloc] initWithRootViewController:welcomeViewController];
-        }
-        
-        
+        rootViewController = [self defaultConversationNavigationController];
 #if CHATSECURE_DEMO
         [self performSelector:@selector(loadDemoData) withObject:nil afterDelay:0.0];
 #endif
     }
-    
-
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = rootViewController;
+
+    /*
+    /////////// testing invite VC
+    OTRInviteViewController *inviteVC = [[OTRInviteViewController alloc] init];
+    OTRAccount *account = [[OTRAccount alloc] init];
+    account.username = @"test@example.com";
+    inviteVC.account = account;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:inviteVC];
+    self.window.rootViewController = nav;
+    ////////////
+    */
+     
     [self.window makeKeyAndVisible];
     
     application.applicationIconBadgeNumber = 0;
@@ -200,7 +185,6 @@
         splitViewController.title = CHAT_STRING;
         
         viewController = splitViewController;
-        
     }
     
     return viewController;
@@ -416,6 +400,43 @@
     if ([[BITHockeyManager sharedHockeyManager].authenticator handleOpenURL:url
                                                           sourceApplication:sourceApplication
                                                                  annotation:annotation]) {
+        return YES;
+    }
+    if ([url.scheme isEqualToString:@"xmpp"]) {
+        XMPPURI *xmppURI = [[XMPPURI alloc] initWithURL:url];
+        XMPPJID *jid = xmppURI.jid;
+        NSString *otrFingerprint = xmppURI.queryParameters[@"otr-fingerprint"];
+        NSString *action = xmppURI.queryAction;
+        if (jid && [action isEqualToString:@"subscribe"]) {
+            NSString *message = jid.full;
+            if (otrFingerprint.length == 40) {
+                message = [message stringByAppendingFormat:@"\n%@", otrFingerprint];
+            }
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:ADD_BUDDY_STRING message:message preferredStyle:UIAlertControllerStyleActionSheet];
+            __block NSArray *accounts = nil;
+            [[OTRDatabaseManager sharedInstance].readOnlyDatabaseConnection readWithBlock:^(YapDatabaseReadTransaction *transaction) {
+                accounts = [OTRAccount allAccountsWithTransaction:transaction];
+            }];
+            [accounts enumerateObjectsUsingBlock:^(OTRAccount *account, NSUInteger idx, BOOL *stop) {
+                if ([account isKindOfClass:[OTRXMPPAccount class]]) {
+                    UIAlertAction *action = [UIAlertAction actionWithTitle:account.username style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                        id<OTRProtocol> protocol = [[OTRProtocolManager sharedInstance] protocolForAccount:account];
+                        OTRBuddy *buddy = [[OTRBuddy alloc] init];
+                        buddy.username = jid.full;
+                        [protocol addBuddy:buddy];
+                        /* TODO OTR fingerprint verificaction
+                        if (otrFingerprint) {
+                            // We are missing a method to add fingerprint to trust store
+                            [[OTRKit sharedInstance] setActiveFingerprintVerificationForUsername:buddy.username accountName:account.username protocol:account.protocolTypeString verified:YES completion:nil];
+                        }*/
+                    }];
+                    [alert addAction:action];
+                }
+            }];
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:CANCEL_STRING style:UIAlertActionStyleCancel handler:nil];
+            [alert addAction:cancel];
+            [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
+        }
         return YES;
     }
     return NO;

@@ -17,6 +17,8 @@
 @property (nonatomic, strong) UIColor *mainThemeColor;
 @property (nonatomic, strong) UIColor *lightThemeColor;
 
+@property (nonatomic, strong) UIColor *buttonLabelColor;
+
 /** Set global app appearance via UIAppearance */
 - (void) setupGlobalTheme;
 

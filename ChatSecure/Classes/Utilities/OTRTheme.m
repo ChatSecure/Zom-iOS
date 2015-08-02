@@ -14,6 +14,7 @@
     if (self = [super init]) {
         _lightThemeColor = [UIColor whiteColor];
         _mainThemeColor = [UIColor blackColor];
+        _buttonLabelColor = [UIColor darkGrayColor];
     }
     return self;
 }

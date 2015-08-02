@@ -24,6 +24,8 @@
 #import "OTRAdvancedWelcomeViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "OTRCircleButtonView.h"
+#import "OTRAppDelegate.h"
+#import "OTRTheme.h"
 
 @interface OTRWelcomeViewController ()
 
@@ -44,7 +46,9 @@
     return self;
 }
 
-
+- (UIColor *) buttonLabelColor {
+    return [OTRAppDelegate appDelegate].theme.buttonLabelColor;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -55,30 +59,32 @@
     [self.skipButton addTarget:self action:@selector(skipButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     [self.skipButton setTitle:NSLocalizedString(@"Skip", @"skip account creation") forState:UIControlStateNormal];
     [self.skipButton.titleLabel setFont:font];
-    [self.skipButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    [self.skipButton setTitleColor:self.buttonLabelColor forState:UIControlStateNormal];
     [self.skipButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateHighlighted];
     
     _advancedButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.advancedButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self.advancedButton addTarget:self action:@selector(advancedButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     [self.advancedButton.titleLabel setFont:font];
-    [self.advancedButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    [self.advancedButton setTitleColor:self.buttonLabelColor forState:UIControlStateNormal];
     [self.advancedButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateHighlighted];
     [self.advancedButton setTitle:NSLocalizedString(@"Login", @"advanced account setup") forState:UIControlStateNormal];
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [OTRAppDelegate appDelegate].theme.mainThemeColor;
     
     _brandImageView = [[UIImageView alloc] initForAutoLayout];
     self.brandImageView.image = [UIImage imageNamed:@"chatsecure_logo_transparent"];
     
-    _createButton = [[OTRCircleButtonView alloc] initWithFrame:CGRectZero title:NSLocalizedString(@"Sign Up", @"create new account") image:[UIImage imageNamed:@"XMPPCreateAccount"] imageSize:CGSizeMake(65, 65) circleSize:CGSizeMake(100, 100) actionBlock:^{
+    _createButton = [[OTRCircleButtonView alloc] initWithFrame:CGRectZero title:NSLocalizedString(@"Sign Up", @"create new account") image:[UIImage imageNamed:@"XMPPCreateAccount"] imageSize:CGSizeMake(95, 95) circleSize:CGSizeMake(100, 100) actionBlock:^{
         [self didTapCreateChatID:self.createButton];
     }];
+    [self.createButton.labelButton setTitleColor:self.buttonLabelColor forState:UIControlStateNormal];
     [self.view addSubview:self.createButton];
     
     _anonymousButton = [[OTRCircleButtonView alloc] initWithFrame:CGRectZero title:NSLocalizedString(@"Anonymous", @"create anonymous account") image:[UIImage imageNamed:@"Tor_Onion"] imageSize:CGSizeMake(85, 85) circleSize:CGSizeMake(100, 100) actionBlock:^{
         [self didTapCreateAnonymousAccount:self.anonymousButton];
     }];
+    [self.anonymousButton.labelButton setTitleColor:self.buttonLabelColor forState:UIControlStateNormal];
     
     [self.view addSubview:self.anonymousButton];
     [self.view addSubview:self.brandImageView];

@@ -7,6 +7,7 @@
 //
 
 #import "ZomTheme.h"
+#import "OTRCircleButtonView.h"
 
 @implementation ZomTheme
 
@@ -14,6 +15,7 @@
     if (self = [super init]) {
         self.lightThemeColor = [UIColor colorWithRed:255/255.0f green:221/255.0f blue:230/255.0f alpha:1.0f];
         self.mainThemeColor = [UIColor colorWithRed:231/255.0f green:39/255.0f blue:90/255.0f alpha:1.0f];
+        self.buttonLabelColor = [UIColor whiteColor];
     }
     return self;
 }

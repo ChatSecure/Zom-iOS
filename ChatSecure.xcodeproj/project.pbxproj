@@ -386,6 +386,8 @@
 		D9755E321B757C7200A60DAC /* OTRTheme.m in Sources */ = {isa = PBXBuildFile; fileRef = D9755E311B757C7200A60DAC /* OTRTheme.m */; };
 		D9755E331B757C7200A60DAC /* OTRTheme.m in Sources */ = {isa = PBXBuildFile; fileRef = D9755E311B757C7200A60DAC /* OTRTheme.m */; };
 		D9755E351B757EB600A60DAC /* Onboarding.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D9755E341B757EB600A60DAC /* Onboarding.storyboard */; };
+		D9755E371B758ACB00A60DAC /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D9755E361B758ACB00A60DAC /* FontAwesome.ttf */; };
+		D9755E381B758ACB00A60DAC /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D9755E361B758ACB00A60DAC /* FontAwesome.ttf */; };
 		D989A84F1B5DBD90000608A9 /* OTRExistingAccountViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D989A84E1B5DBD90000608A9 /* OTRExistingAccountViewController.m */; };
 		D989EC8D1B06AFE30069FE37 /* XMPPURI.m in Sources */ = {isa = PBXBuildFile; fileRef = D989EC8C1B06AFE30069FE37 /* XMPPURI.m */; };
 		D9A3CB2C1B2798D7000A50C6 /* XMPPURITests.m in Sources */ = {isa = PBXBuildFile; fileRef = D9A3CB2B1B2798D7000A50C6 /* XMPPURITests.m */; };
@@ -823,6 +825,7 @@
 		D9755E301B757C7200A60DAC /* OTRTheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OTRTheme.h; sourceTree = "<group>"; };
 		D9755E311B757C7200A60DAC /* OTRTheme.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTRTheme.m; sourceTree = "<group>"; };
 		D9755E341B757EB600A60DAC /* Onboarding.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Onboarding.storyboard; path = Resources/Onboarding.storyboard; sourceTree = "<group>"; };
+		D9755E361B758ACB00A60DAC /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = Pods/BButton/BButton/resources/FontAwesome.ttf; sourceTree = SOURCE_ROOT; };
 		D989A84D1B5DBD90000608A9 /* OTRExistingAccountViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OTRExistingAccountViewController.h; path = "Login View Controllers/OTRExistingAccountViewController.h"; sourceTree = "<group>"; };
 		D989A84E1B5DBD90000608A9 /* OTRExistingAccountViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OTRExistingAccountViewController.m; path = "Login View Controllers/OTRExistingAccountViewController.m"; sourceTree = "<group>"; };
 		D989EC8B1B06AFE30069FE37 /* XMPPURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPURI.h; sourceTree = "<group>"; };
@@ -869,6 +872,7 @@
 		633104D71A169EE600C17BAE /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D9755E361B758ACB00A60DAC /* FontAwesome.ttf */,
 				D95AD2281B684AE1007DEBC3 /* xmpp-server-list */,
 				D973D7051A2D4094004D353E /* Pods-acknowledgements.plist */,
 				D9365E791A1EB0050006434A /* torrc */,
@@ -1690,6 +1694,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9C6E69F1B7148EF00572273 /* OTRUsernameCell.xib in Resources */,
+				D9755E371B758ACB00A60DAC /* FontAwesome.ttf in Resources */,
 				D913A56D1B747B62006C5ACD /* Onboarding.storyboard in Resources */,
 				632461521A1ADC77000EF33B /* Localizable.strings in Resources */,
 				6331072C1A16D1F200C17BAE /* Images.xcassets in Resources */,
@@ -1715,6 +1720,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9755E351B757EB600A60DAC /* Onboarding.storyboard in Resources */,
+				D9755E381B758ACB00A60DAC /* FontAwesome.ttf in Resources */,
 				D9755E091B75778D00A60DAC /* OTRUsernameCell.xib in Resources */,
 				D9755E0B1B75778D00A60DAC /* Localizable.strings in Resources */,
 				D9755E281B7578A000A60DAC /* Images.xcassets in Resources */,

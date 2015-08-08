@@ -8,7 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "OTRWelcomeViewController.h"
+#if ZOM_WHITELABEL
+#import "Zom-Swift.h"
+#else
+#import "ChatSecure-Swift.h"
+#endif
 
 @class OTRWelcomeViewController;
 
@@ -21,8 +25,5 @@
 
 /** Set global app appearance via UIAppearance */
 - (void) setupGlobalTheme;
-
-/** Can override backgroundColor, textLabelColor, lightBackgroundColor */
-- (void) setThemeForWelcomeViewController:(OTRWelcomeViewController*)welcomeViewController;
 
 @end

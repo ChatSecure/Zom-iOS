@@ -13,7 +13,11 @@
 #import "OTRProtocolManager.h"
 #import "OTRDatabaseManager.h"
 #import "OTRPasswordGenerator.h"
-
+#if ZOM_WHITELABEL
+#import "Zom-Swift.h"
+#else
+#import "ChatSecure-Swift.h"
+#endif
 @interface OTRXMPPLoginHandler()
 @property (nonatomic, strong) NSString *password;
 @end
@@ -22,7 +26,11 @@
 
 - (void)moveAccountValues:(OTRXMPPAccount *)account intoForm:(XLFormDescriptor *)form
 {
-    [[form formRowWithTag:kOTRXLFormUsernameTextFieldTag] setValue:account.username];
+    XLFormRowDescriptor *usernameRow = [form formRowWithTag:kOTRXLFormUsernameTextFieldTag];
+    if (!usernameRow.value) {
+        NSDictionary *username = [OTRUsernameCell createRowDictionaryValueForUsername:account.username domain:account.domain];
+        usernameRow.value = username;
+    }
     [[form formRowWithTag:kOTRXLFormPasswordTextFieldTag] setValue:account.password];
     [[form formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] setValue:@(account.rememberPassword)];
     [[form formRowWithTag:kOTRXLFormLoginAutomaticallySwitchTag] setValue:@(account.autologin)];
@@ -39,8 +47,9 @@
 
 - (OTRXMPPAccount *)moveValues:(XLFormDescriptor *)form intoAccount:(OTRXMPPAccount *)account
 {
-    NSString *username = [[form formRowWithTag:kOTRXLFormUsernameTextFieldTag] value];
-    account.username = username;
+    NSDictionary *username = [[form formRowWithTag:kOTRXLFormUsernameTextFieldTag] value];
+    account.username = username[OTRUsernameCell.UsernameKey];
+    //account.domain = username[OTRUsernameCell.DomainKey];
     NSNumber *rememberPassword = [[form formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] value];
     if (rememberPassword) {
         account.rememberPassword = [rememberPassword boolValue];

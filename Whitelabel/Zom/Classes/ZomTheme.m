@@ -33,11 +33,4 @@
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
 }
 
-/** Can override backgroundColor and textLabelColor */
-- (void) setThemeForWelcomeViewController:(OTRWelcomeViewController*)welcomeViewController {
-    welcomeViewController.textLabelColor = [UIColor whiteColor];
-    welcomeViewController.backgroundColor = self.mainThemeColor;
-    welcomeViewController.lightBackgroundColor = self.lightThemeColor;
-}
-
 @end

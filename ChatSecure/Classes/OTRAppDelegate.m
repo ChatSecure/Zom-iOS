@@ -37,15 +37,15 @@
 #import "OTRSettingsManager.h"
 #import "OTRSecrets.h"
 #import "OTRDatabaseManager.h"
-#import "SSKeychain.h"
+#import <SSKeychain/SSKeychain.h>
 
 #import "OTRLog.h"
 #import "DDTTYLogger.h"
 #import "OTRAccount.h"
 #import "OTRXMPPAccount.h"
 #import "OTRBuddy.h"
-#import "YAPDatabaseTransaction.h"
-#import "YapDatabaseConnection.h"
+@import YapDatabase;
+
 #import "OTRCertificatePinning.h"
 #import "NSData+XMPP.h"
 #import "NSURL+ChatSecure.h"
@@ -56,7 +56,6 @@
 #import "OTRNotificationController.h"
 #import "UIAlertView+Blocks.h"
 #import "XMPPURI.h"
-#import "OTRWelcomeViewController.h"
 #import "OTRProtocolManager.h"
 #import "OTRInviteViewController.h"
 #import "OTRTheme.h"

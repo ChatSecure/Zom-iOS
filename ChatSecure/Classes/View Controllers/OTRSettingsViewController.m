@@ -36,12 +36,9 @@
 #import "UIActionSheet+ChatSecure.h"
 #import "UIActionSheet+Blocks.h"
 #import "OTRSecrets.h"
-#import "YAPDatabaseViewMappings.h"
-#import "YAPDatabaseConnection.h"
+@import YapDatabase;
 #import "OTRDatabaseManager.h"
 #import "OTRDatabaseView.h"
-#import "YapDatabase.h"
-#import "YapDatabaseView.h"
 #import "OTRAccount.h"
 #import "OTRAppDelegate.h"
 #import "OTRUtilities.h"
@@ -49,12 +46,15 @@
 #import "OTRActivityItemProvider.h"
 #import "OTRQRCodeActivity.h"
 #import "XMPPURI.h"
-#import "OTRWelcomeViewController.h"
 #import "OTRBaseLoginViewController.h"
 #import "OTRXLFormCreator.h"
 #import <KVOController/FBKVOController.h>
 #import "OTRInviteViewController.h"
-
+#if ZOM_WHITELABEL
+#import "Zom-Swift.h"
+#else
+#import "ChatSecure-Swift.h"
+#endif
 static NSString *const circleImageName = @"31-circle-plus-large.png";
 
 @interface OTRSettingsViewController () <UITableViewDataSource, UITableViewDelegate, OTRShareSettingDelegate>
@@ -358,9 +358,10 @@ static NSString *const circleImageName = @"31-circle-plus-large.png";
 }
 
 - (void) addAccount:(id)sender {
-    OTRWelcomeViewController *welcomeViewController = [[OTRWelcomeViewController alloc] init];
+    UIStoryboard *onboardingStoryboard = [UIStoryboard storyboardWithName:@"Onboarding" bundle:[NSBundle mainBundle]];
+    UINavigationController *welcomeNavController = [onboardingStoryboard instantiateInitialViewController];
+    OTRWelcomeViewController *welcomeViewController = welcomeNavController.viewControllers[0];
     __weak id welcomeVC = welcomeViewController;
-    welcomeViewController.showNavigationBar = NO;
     [welcomeViewController setCompletionBlock:^(OTRAccount *account, NSError *error) {
         if (account) {
             [OTRInviteViewController showInviteFromVC:welcomeVC withAccount:account];

@@ -18,6 +18,13 @@
 #import "OTRAccount.h"
 #import "MBProgressHUD.h"
 #import "OTRXLFormCreator.h"
+#if ZOM_WHITELABEL
+#import "Zom-Swift.h"
+#else
+#import "ChatSecure-Swift.h"
+#endif
+#import "OTRXMPPServerInfo.h"
+#import "OTRXMPPAccount.h"
 
 @interface OTRBaseLoginViewController ()
 
@@ -30,9 +37,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.loginCreateButtonItem = [[UIBarButtonItem alloc] initWithTitle:LOGIN_STRING style:UIBarButtonItemStylePlain target:self action:@selector(loginButtonPressed:)];
+    UIImage *checkImage = [UIImage imageNamed:@"ic-check"];
+    UIBarButtonItem *checkButton = [[UIBarButtonItem alloc] initWithImage:checkImage style:UIBarButtonItemStylePlain target:self action:@selector(loginButtonPressed:)];
     
-    self.navigationItem.rightBarButtonItem = self.loginCreateButtonItem;
+    self.navigationItem.rightBarButtonItem = checkButton;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -46,6 +54,9 @@
     [self.navigationController setNavigationBarHidden:NO animated:animated];
     [self.tableView reloadData];
     [self.createLoginHandler moveAccountValues:self.account intoForm:self.form];
+    
+    // We need to refresh the username row with the default selected server
+    [self updateUsernameRow];
 }
 
 - (void)setAccount:(OTRAccount *)account
@@ -63,12 +74,12 @@
     if ([self validForm]) {
         self.form.disabled = YES;
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.loginCreateButtonItem.enabled = NO;
+        self.navigationItem.rightBarButtonItem.enabled = NO;
         self.navigationItem.leftBarButtonItem.enabled = NO;
         self.navigationItem.backBarButtonItem.enabled = NO;
         [self.createLoginHandler performActionWithValidForm:self.form account:self.account completion:^(OTRAccount *account, NSError *error) {
             self.form.disabled = NO;
-            self.loginCreateButtonItem.enabled = YES;
+            self.navigationItem.rightBarButtonItem.enabled = YES;
             self.navigationItem.backBarButtonItem.enabled = YES;
             self.navigationItem.leftBarButtonItem.enabled = YES;
             [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
@@ -108,6 +119,38 @@
         
     }];
     return validForm;
+}
+
+- (void) updateUsernameRow {
+    XLFormRowDescriptor *usernameRow = [self.form formRowWithTag:kOTRXLFormUsernameTextFieldTag];
+    if (!usernameRow) {
+        return;
+    }
+    NSMutableDictionary *username = [usernameRow.value mutableCopy];
+    XLFormRowDescriptor *serverRow = [self.form formRowWithTag:kOTRXLFormXMPPServerTag];
+    NSString *domain = nil;
+    if (serverRow) {
+        OTRXMPPServerInfo *serverInfo = serverRow.value;
+        domain = serverInfo.domain;
+    } else {
+        OTRXMPPAccount *xmppAccount = (OTRXMPPAccount*)self.account;
+        domain = xmppAccount.domain;
+    }
+    if (domain) {
+        [username setObject:domain forKey:[OTRUsernameCell DomainKey]];
+        usernameRow.value = username;
+        [self updateFormRow:usernameRow];
+    }
+}
+
+#pragma mark XLFormDescriptorDelegate
+
+-(void)formRowDescriptorValueHasChanged:(XLFormRowDescriptor *)formRow oldValue:(id)oldValue newValue:(id)newValue
+{
+    [super formRowDescriptorValueHasChanged:formRow oldValue:oldValue newValue:newValue];
+    if (formRow.tag == kOTRXLFormXMPPServerTag) {
+        [self updateUsernameRow];
+    }
 }
 
  #pragma - mark Errors and Alert Views

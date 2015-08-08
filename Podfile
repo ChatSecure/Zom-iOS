@@ -1,10 +1,11 @@
-platform :ios, "7.0"
+platform :ios, "8.0"
 
+use_frameworks!
 inhibit_all_warnings!
 
 source 'https://github.com/CocoaPods/Specs.git'
 
-link_with 'ChatSecure', 'ChatSecureTests'
+link_with 'ChatSecure', 'ChatSecureTests', 'Zom'
 
 pod 'AFNetworking', '~> 2.4'
 pod "Appirater", '~> 2.0'
@@ -35,6 +36,7 @@ pod 'ARChromeActivity', '~> 1.0'
 pod 'CocoaAsyncSocket', '~> 7.4'
 pod 'JTSImageViewController', '~> 1.4'
 pod 'KVOController', '~> 1.0'
+pod 'ParkedTextField', '~> 0.1'
 
 # QR Codes
 pod 'QRCodeReaderViewController', '~> 3.5.0'

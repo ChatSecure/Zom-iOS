@@ -14,6 +14,11 @@
 #import "OTRImages.h"
 #import "OTRXMPPServerListViewController.h"
 #import "OTRXMPPServerInfo.h"
+#if ZOM_WHITELABEL
+#import "Zom-Swift.h"
+#else
+#import "ChatSecure-Swift.h"
+#endif
 
 NSString *const kOTRXLFormUsernameTextFieldTag        = @"kOTRXLFormUsernameTextFieldTag";
 NSString *const kOTRXLFormPasswordTextFieldTag        = @"kOTRXLFormPasswordTextFieldTag";
@@ -24,19 +29,31 @@ NSString *const kOTRXLFormPortTextFieldTag            = @"kOTRXLFormPortTextFiel
 NSString *const kOTRXLFormResourceTextFieldTag        = @"kOTRXLFormResourceTextFieldTag";
 NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTag";
 
+NSString *const kOTRXLFormShowAdvancedTag               = @"kOTRXLFormShowAdvancedTag";
+
+NSString *const kOTRXLFormGenerateSecurePasswordTag               = @"kOTRXLFormGenerateSecurePasswordTag";
+
+
 @implementation OTRXLFormCreator
 
 + (XLFormDescriptor *)formForAccount:(OTRAccount *)account
 {
     XLFormDescriptor *descriptor = [self formForAccountType:account.accountType createAccount:NO];
     
-    [[descriptor formRowWithTag:kOTRXLFormUsernameTextFieldTag] setValue:account.username];
+    NSDictionary *username = [OTRUsernameCell createRowDictionaryValueForUsername:account.username domain:nil];
+    [[descriptor formRowWithTag:kOTRXLFormUsernameTextFieldTag] setValue:username];
     [[descriptor formRowWithTag:kOTRXLFormPasswordTextFieldTag] setValue:account.password];
     [[descriptor formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] setValue:@(account.rememberPassword)];
     [[descriptor formRowWithTag:kOTRXLFormLoginAutomaticallySwitchTag] setValue:@(account.autologin)];
     
     if([account isKindOfClass:[OTRXMPPAccount class]]) {
         OTRXMPPAccount *xmppAccount = (OTRXMPPAccount *)account;
+        NSString *jidWithoutDomain = account.username;
+        if ([jidWithoutDomain containsString:@"@"]) {
+            jidWithoutDomain = [[jidWithoutDomain componentsSeparatedByString:@"@"] firstObject];
+        }
+        NSDictionary *username = [OTRUsernameCell createRowDictionaryValueForUsername:jidWithoutDomain domain:xmppAccount.domain];
+        [[descriptor formRowWithTag:kOTRXLFormUsernameTextFieldTag] setValue:username];
         [[descriptor formRowWithTag:kOTRXLFormHostnameTextFieldTag] setValue:xmppAccount.domain];
         [[descriptor formRowWithTag:kOTRXLFormPortTextFieldTag] setValue:@(xmppAccount.port)];
         [[descriptor formRowWithTag:kOTRXLFormResourceTextFieldTag] setValue:xmppAccount.resource];
@@ -50,17 +67,36 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
     XLFormDescriptor *descriptor = nil;
     if (createAccount) {
         descriptor = [[XLFormDescriptor alloc] initWithTitle:NSLocalizedString(@"Sign Up", @"title for creating a new account")];
-        XLFormSectionDescriptor *basicSection = [XLFormSectionDescriptor formSectionWithTitle:nil];
-        [basicSection addFormRow:[self usernameTextFieldRowDescriptorWithValue:nil]];
-        [basicSection addFormRow:[self passwordTextFieldRowDescriptorWithValue:nil]];
+        descriptor.assignFirstResponderOnShow = YES;
         
+        XLFormSectionDescriptor *basicSection = [XLFormSectionDescriptor formSectionWithTitle:NSLocalizedString(@"Basic Setup", @"username section")];
+        basicSection.footerTitle = NSLocalizedString(@"Think of a unique username that you don't use anywhere else and doesn't contain personal information.", @"basic setup selection footer");
+        [basicSection addFormRow:[self usernameTextFieldRowDescriptorWithValue:nil]];
+        
+        XLFormSectionDescriptor *showAdvancedSection = [XLFormSectionDescriptor formSectionWithTitle:nil];
+        XLFormRowDescriptor *showAdvancedRow = [XLFormRowDescriptor formRowDescriptorWithTag:kOTRXLFormShowAdvancedTag rowType:XLFormRowDescriptorTypeBooleanSwitch title:NSLocalizedString(@"Show Advanced Options", @"toggle switch for show advanced")];
+        showAdvancedRow.value = @0;
+        [showAdvancedSection addFormRow:showAdvancedRow];
+        
+        XLFormSectionDescriptor *passwordSection = [XLFormSectionDescriptor formSectionWithTitle:NSLocalizedString(@"Password", @"password section")];
+        passwordSection.footerTitle = NSLocalizedString(@"We can automatically generate you a secure password. If you choose your own, make sure it's a unique password you don't use anywhere else.", @"help text for password generator");
+        passwordSection.hidden = [NSString stringWithFormat:@"$%@==0", kOTRXLFormShowAdvancedTag];
+        XLFormRowDescriptor *generatePasswordRow = [XLFormRowDescriptor formRowDescriptorWithTag:kOTRXLFormGenerateSecurePasswordTag rowType:XLFormRowDescriptorTypeBooleanSwitch title:NSLocalizedString(@"Generate Secure Password", @"whether or not we should generate a strong password for them")];
+        generatePasswordRow.value = @1;
+        XLFormRowDescriptor *passwordRow = [self passwordTextFieldRowDescriptorWithValue:nil];
+        passwordRow.hidden = [NSString stringWithFormat:@"$%@==1", kOTRXLFormGenerateSecurePasswordTag];
+        [passwordSection addFormRow:generatePasswordRow];
+        [passwordSection addFormRow:passwordRow];
         
         XLFormSectionDescriptor *serverSection = [XLFormSectionDescriptor formSectionWithTitle:NSLocalizedString(@"Server", @"server selection section title")];
-        serverSection.footerTitle = NSLocalizedString(@"Choose from our list of trusted servers, or bring your own.", @"server selection footer");
+        serverSection.hidden = [NSString stringWithFormat:@"$%@==0", kOTRXLFormShowAdvancedTag];
+
+        serverSection.footerTitle = NSLocalizedString(@"Choose from our list of trusted servers, or use your own.", @"server selection footer");
         [serverSection addFormRow:[self serverRowDescriptorWithValue:nil]];
         
-        
         [descriptor addFormSection:basicSection];
+        [descriptor addFormSection:showAdvancedSection];
+        [descriptor addFormSection:passwordSection];
         [descriptor addFormSection:serverSection];
         
         
@@ -105,19 +141,6 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
     return descriptor;
 }
 
-+ (XLFormDescriptor *)ChatSecureIDForm
-{
-    XLFormDescriptor *form = [XLFormDescriptor formDescriptor];
-    XLFormSectionDescriptor *section = [XLFormSectionDescriptor formSection];
-    XLFormRowDescriptor *usernameRow = [self usernameTextFieldRowDescriptorWithValue:nil];
-    [usernameRow.cellConfigAtConfigure setObject:@"ChatSecure ID" forKey:@"textField.placeholder"];
-    
-    [section addFormRow:usernameRow];
-    [form addFormSection:section];
-    
-    return form;
-}
-
 + (XLFormRowDescriptor *)textfieldFormDescriptorType:(NSString *)type withTag:(NSString *)tag title:(NSString *)title placeHolder:(NSString *)placeholder value:(id)value
 {
     XLFormRowDescriptor *textFieldDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:tag rowType:type title:title];
@@ -131,8 +154,9 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
 
 + (XLFormRowDescriptor *)usernameTextFieldRowDescriptorWithValue:(NSString *)value
 {
-    XLFormRowDescriptor *usernameDescriptor = [self textfieldFormDescriptorType:XLFormRowDescriptorTypeEmail withTag:kOTRXLFormUsernameTextFieldTag title:USERNAME_STRING placeHolder:XMPP_USERNAME_EXAMPLE_STRING value:value];
-    usernameDescriptor.required = YES;
+    XLFormRowDescriptor *usernameDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:kOTRXLFormUsernameTextFieldTag rowType:[OTRUsernameCell kOTRFormRowDescriptorTypeUsername] title:USERNAME_STRING];
+    usernameDescriptor.value = value;
+    [usernameDescriptor addValidator:[[OTRUsernameValidator alloc] init]];
     return usernameDescriptor;
 }
 
@@ -187,11 +211,13 @@ NSString *const kOTRXLFormXMPPServerTag               = @"kOTRXLFormXMPPServerTa
     return resourceRowDescriptor;
 }
 
-+ (XLFormRowDescriptor *)serverRowDescriptorWithValue:(id)value
++ (XLFormRowDescriptor *)serverRowDescriptorWithValue:(OTRXMPPServerInfo *)value
 {
     XLFormRowDescriptor *xmppServerDescriptor = [XLFormRowDescriptor formRowDescriptorWithTag:kOTRXLFormXMPPServerTag rowType:kOTRFormRowDescriptorTypeXMPPServer];
-    
-    xmppServerDescriptor.value = [[OTRXMPPServerInfo defaultServerList] firstObject];
+    if (!value) {
+        value = [[OTRXMPPServerInfo defaultServerList] firstObject];
+    }
+    xmppServerDescriptor.value = value;
     xmppServerDescriptor.action.viewControllerClass = [OTRXMPPServerListViewController class];
     
     return xmppServerDescriptor;

@@ -23,8 +23,4 @@
 - (void) setupGlobalTheme {
 }
 
-/** Can override backgroundColor and textLabelColor */
-- (void) setThemeForWelcomeViewController:(OTRWelcomeViewController*)welcomeViewController {
-}
-
 @end
